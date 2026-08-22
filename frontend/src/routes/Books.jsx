@@ -5,7 +5,8 @@ import BookCardSkeleton from '../components/book/BookCardSkeleton';
 import BookDetailModal from '../components/book/BookDetailModal';
 import Pagination from '../components/books/Pagination';
 import { fetchBooks, searchSemanticBooks } from '../lib/apiClient';
-import { BookOpen, Layers, Search, X } from 'lucide-react';
+import { validateSearchInput } from '../lib/validateSearchInput';
+import { BookOpen, Layers, Search, X, AlertTriangle } from 'lucide-react';
 
 export default function Books() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,23 +20,30 @@ export default function Books() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [validationError, setValidationError] = useState(null);
 
   const [selectedBook, setSelectedBook] = useState(null);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      setActiveQuery(searchQuery.trim());
-      setPage(1);
-      setSearchQuery('');
+    const result = validateSearchInput(searchQuery);
+    if (!result.isValid) {
+      setValidationError(result.message);
+      return;
     }
+    setValidationError(null);
+    setActiveQuery(result.sanitized);
+    setPage(1);
+    setSearchQuery('');
   };
 
   const handleClearQuery = () => {
     setSearchQuery('');
     setActiveQuery('');
+    setValidationError(null);
     setPage(1);
   };
+
 
   useEffect(() => {
     let isMounted = true;
@@ -149,7 +157,24 @@ export default function Books() {
           </form>
         </div>
 
+        {/* Validation Error Alert Banner */}
+        {validationError && (
+          <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 flex items-center justify-between gap-3 text-sm shadow-sm animate-in fade-in">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
+              <span className="font-medium">{validationError}</span>
+            </div>
+            <button
+              onClick={() => setValidationError(null)}
+              className="p-1 rounded-full hover:bg-rose-100 text-rose-500 hover:text-rose-800 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Filter & Sort Bar */}
+
         <FilterBar
           selectedCategory={category}
           onSelectCategory={(cat) => {

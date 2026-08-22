@@ -7,7 +7,9 @@ import BookCardSkeleton from '../components/book/BookCardSkeleton';
 import BookDetailModal from '../components/book/BookDetailModal';
 import Pagination from '../components/books/Pagination';
 import { searchSemanticBooks } from '../lib/apiClient';
+import { validateSearchInput } from '../lib/validateSearchInput';
 import { BookOpen, Clock, AlertCircle, HelpCircle, CheckCircle2 } from 'lucide-react';
+
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,6 +45,7 @@ export default function Home() {
   }, [searchParams]);
 
   // Load Search Results ONLY when activeSearch is present
+
   useEffect(() => {
     let isMounted = true;
 
@@ -52,11 +55,19 @@ export default function Home() {
       return;
     }
 
+    const validation = validateSearchInput(activeSearch);
+    if (!validation.isValid) {
+      setError(validation.message);
+      setBooks([]);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     searchSemanticBooks({
-      query: activeSearch,
+      query: validation.sanitized,
       use_reranker: useReranker,
       page,
       limit: 10
@@ -82,7 +93,8 @@ export default function Home() {
       .catch((err) => {
         if (isMounted) {
           console.error("Search error:", err);
-          setError("Gagal melakukan pencarian rekomendasi. Pastikan server backend FastAPI sedang berjalan.");
+          const serverError = err.response?.data?.detail || "Gagal melakukan pencarian rekomendasi. Pastikan server backend FastAPI sedang berjalan.";
+          setError(serverError);
           setBooks([]);
         }
       })
@@ -94,6 +106,7 @@ export default function Home() {
       isMounted = false;
     };
   }, [activeSearch, useReranker, page]);
+
 
   const handleSearchExecute = (q, rerank) => {
     setActiveSearch(q);

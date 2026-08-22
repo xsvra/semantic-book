@@ -56,11 +56,15 @@ fastapi_app.add_middleware(
     allow_headers=["*"],
 )
 
+from app.utils.query_validator import validate_search_query
+
 # 5. ZeroGPU decorated function following official HF ZeroGPU specification
 @spaces.GPU
 def predict_search(query: str):
-    if not query or not query.strip():
-        return "Masukkan kata kunci pencarian..."
+    is_valid, err_msg = validate_search_query(query)
+    if not is_valid:
+        return f"⚠️ Validasi Gagal: {err_msg}"
+
     results, total, time_sec, reranked, suggestion, suggestion_id, exact = recommend_service.search_books(
         query=query.strip(),
         top_k=5

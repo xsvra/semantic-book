@@ -1,5 +1,6 @@
-import React from 'react';
-import { Search, Globe, Brain, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Globe, Brain, AlertTriangle, X } from 'lucide-react';
+import { validateSearchInput } from '../../lib/validateSearchInput';
 
 const SAMPLE_QUERIES = [
   "cara mengelola waktu dan mengatasi prokrastinasi...",
@@ -9,16 +10,23 @@ const SAMPLE_QUERIES = [
 ];
 
 export default function HeroSection({ query, setQuery, onSearch, useReranker, setUseReranker, isSearching }) {
+  const [validationError, setValidationError] = useState(null);
+
   const handleSampleClick = (sample) => {
     setQuery(sample);
+    setValidationError(null);
     onSearch(sample, useReranker);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      onSearch(query.trim(), useReranker);
+    const result = validateSearchInput(query);
+    if (!result.isValid) {
+      setValidationError(result.message);
+      return;
     }
+    setValidationError(null);
+    onSearch(result.sanitized, useReranker);
   };
 
   return (
@@ -37,14 +45,33 @@ export default function HeroSection({ query, setQuery, onSearch, useReranker, se
           Cari berdasarkan topik, pertanyaan, atau masalah yang ingin kamu selesaikan — sistem kami memahami makna mendalam di balik setiap kalimatmu secara multilingual & cross-lingual.
         </p>
 
+        {/* Validation Error Alert */}
+        {validationError && (
+          <div className="max-w-2xl mx-auto mb-4 p-3.5 rounded-2xl bg-rose-500/20 border border-rose-400/50 text-rose-200 flex items-center justify-between text-xs sm:text-sm animate-in fade-in shadow-lg">
+            <div className="flex items-center gap-2.5 text-left">
+              <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+              <span className="font-medium">{validationError}</span>
+            </div>
+            <button
+              onClick={() => setValidationError(null)}
+              className="p-1 rounded-full hover:bg-rose-500/30 text-rose-300 hover:text-white transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Main Search Bar */}
         <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto mb-6">
-          <div className="relative flex items-center bg-white rounded-full border border-slate-300 shadow-2xl p-2 transition-all focus-within:ring-4 focus-within:ring-amber-400/30">
+          <div className={`relative flex items-center bg-white rounded-full border shadow-2xl p-2 transition-all focus-within:ring-4 ${validationError ? 'border-rose-500 ring-rose-400/40' : 'border-slate-300 focus-within:ring-amber-400/30'}`}>
             <Search className="w-6 h-6 text-slate-700 ml-4 shrink-0" />
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                if (validationError) setValidationError(null);
+              }}
               placeholder="Ketik judul buku, topik, atau kecemasan yang ingin kamu atasi..."
               className="w-full px-4 py-3 text-sm sm:text-base bg-transparent text-slate-900 focus:outline-none placeholder:text-slate-400"
             />

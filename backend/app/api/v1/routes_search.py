@@ -3,13 +3,16 @@ from fastapi import APIRouter, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from app.models.schemas import SearchRequest, SearchResponse
 from app.services.recommend_service import recommend_service
+from app.utils.query_validator import validate_search_query
 
 router = APIRouter(prefix="/search", tags=["Search"])
 
 @router.post("", response_model=SearchResponse)
 async def search_books(req: SearchRequest):
-    if not req.query or not req.query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    is_valid, error_msg = validate_search_query(req.query)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+
 
     results, total, inference_time, used_reranker, did_you_mean, did_you_mean_book_id, is_exact_match = await run_in_threadpool(
         recommend_service.search_books,
