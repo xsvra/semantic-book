@@ -86,12 +86,12 @@ if gr is not None:
         search_btn = gr.Button("Cari Rekomendasi")
         search_btn.click(fn=predict_search, inputs=input_text, outputs=output_text)
 
-    # 7. Mount Gradio interface onto root FastAPI app under /
-    app = gr.mount_gradio_app(fastapi_app, demo, path="/")
+    # 7. Mount Gradio interface onto root FastAPI app under /status (prevents Jinja2 template collisions)
+    app = gr.mount_gradio_app(fastapi_app, demo, path="/status")
 else:
     app = fastapi_app
 
 # 8. Launch ONLY when executed directly as main script
 if __name__ == "__main__":
     if gr is not None and 'demo' in locals():
-        demo.launch(server_name="0.0.0.0", server_port=7860)
+        demo.launch()
