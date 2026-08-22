@@ -28,12 +28,13 @@ export default function TopRatedCarousel({ books, isLoading, onBookClick }) {
               </div>
             ))
           ) : (
-            books && books.map((book) => (
+            Array.isArray(books) && books.map((book) => (
               <div key={book.book_id} className="w-64 shrink-0 snap-start">
                 <BookCard book={book} onClick={onBookClick} />
               </div>
             ))
           )}
+
         </div>
       </div>
     </section>

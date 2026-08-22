@@ -26,9 +26,11 @@ export default function TopRatedGrid({ onSelectBook }) {
     return () => { isMounted = false; };
   }, []);
 
-  const totalPages = Math.ceil(books.length / itemsPerPage);
+  const safeBooks = Array.isArray(books) ? books : [];
+  const totalPages = Math.max(1, Math.ceil(safeBooks.length / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentBooks = books.slice(startIndex, startIndex + itemsPerPage);
+  const currentBooks = safeBooks.slice(startIndex, startIndex + itemsPerPage);
+
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
