@@ -1,0 +1,58 @@
+[
+  {
+    "system_name": "MINILM_RERANK",
+    "precision_at_5": 0.716,
+    "precision_at_10": 0.647,
+    "recall_at_5": 0.1121,
+    "recall_at_10": 0.2026,
+    "map_at_5": 0.6477,
+    "map_at_10": 0.5529,
+    "mrr_at_5": 0.8275,
+    "mrr_at_10": 0.8321,
+    "ndcg_at_5": 0.5609,
+    "ndcg_at_10": 0.5263,
+    "pooled_recall_at_50": 0.6434
+  },
+  {
+    "system_name": "MINILM_RETRIEVAL",
+    "precision_at_5": 0.678,
+    "precision_at_10": 0.63,
+    "recall_at_5": 0.1071,
+    "recall_at_10": 0.1968,
+    "map_at_5": 0.6049,
+    "map_at_10": 0.5311,
+    "mrr_at_5": 0.8257,
+    "mrr_at_10": 0.8284,
+    "ndcg_at_5": 0.5562,
+    "ndcg_at_10": 0.5273,
+    "pooled_recall_at_50": 0.6434
+  },
+  {
+    "system_name": "MPNET_RERANK",
+    "precision_at_5": 0.768,
+    "precision_at_10": 0.731,
+    "recall_at_5": 0.1226,
+    "recall_at_10": 0.2347,
+    "map_at_5": 0.7146,
+    "map_at_10": 0.6486,
+    "mrr_at_5": 0.8783,
+    "mrr_at_10": 0.8828,
+    "ndcg_at_5": 0.5956,
+    "ndcg_at_10": 0.5819,
+    "pooled_recall_at_50": 0.7771
+  },
+  {
+    "system_name": "MPNET_RETRIEVAL",
+    "precision_at_5": 0.766,
+    "precision_at_10": 0.716,
+    "recall_at_5": 0.1223,
+    "recall_at_10": 0.2268,
+    "map_at_5": 0.7152,
+    "map_at_10": 0.6382,
+    "mrr_at_5": 0.859,
+    "mrr_at_10": 0.864,
+    "ndcg_at_5": 0.6207,
+    "ndcg_at_10": 0.5912,
+    "pooled_recall_at_50": 0.7771
+  }
+]

@@ -1,0 +1,16 @@
+# Dependencies & Virtual Envs
+node_modules/
+dist/
+build/
+venv/
+__pycache__/
+
+# Large Datasets & Local Models (Not needed for Vercel/GitHub)
+GoodReads_100k_books.csv
+models/
+semantic-book-backend/
+
+# Local Environment & Logs
+.env.local
+.DS_Store
+*.log

@@ -1,0 +1,22 @@
+{
+  "application_name": "Nonfiction Book Recommendation System",
+  "catalog_file": "data/books_catalog.parquet",
+  "embedding_file": "data/mpnet_embeddings.npy",
+  "title_index_file": "data/title_search_index.json",
+  "embedding_model_name": "sentence-transformers/paraphrase-multilingual-mpnet-base-v2",
+  "embedding_model_local_path": "models/multilingual_mpnet",
+  "reranker_model_name": "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1",
+  "reranker_model_local_path": "models/multilingual_cross_encoder",
+  "default_use_reranker": false,
+  "top_k_candidates": 50,
+  "default_page_size": 10,
+  "maximum_page_size": 20,
+  "fuzzy_score_cutoff": 85,
+  "fuzzy_suggestion_limit": 5,
+  "fuzzy_auto_accept_score": 92,
+  "fuzzy_min_length_ratio": 0.65,
+  "default_auto_accept_fuzzy": false,
+  "embedding_normalized": true,
+  "primary_metric": "ndcg_at_10",
+  "selected_system": "MPNET_RETRIEVAL"
+}
