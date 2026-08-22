@@ -66,11 +66,23 @@ with gr.Blocks(title="Nonfiction Book Recommendation System API") as demo:
     search_btn = gr.Button("Cari Rekomendasi")
     search_btn.click(fn=predict_search, inputs=input_text, outputs=output_text)
 
-# 6. Include FastAPI REST API routers directly into Gradio's underlying FastAPI app
+# 6. Enable CORS Middleware on Gradio's underlying FastAPI app to allow Vercel domain requests
+from fastapi.middleware.cors import CORSMiddleware
+
+demo.app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 7. Include FastAPI REST API routers directly into Gradio's underlying FastAPI app
 demo.app.include_router(books_router, prefix="/api/v1")
 demo.app.include_router(recommend_router, prefix="/api/v1")
 demo.app.include_router(search_router, prefix="/api/v1")
 demo.app.include_router(meta_router, prefix="/api/v1")
 
-# 7. Launch Gradio natively for Hugging Face Space
+# 8. Launch Gradio natively for Hugging Face Space
 demo.launch()
+

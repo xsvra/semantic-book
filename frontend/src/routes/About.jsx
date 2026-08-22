@@ -10,7 +10,7 @@ export default function About() {
     let isMounted = true;
     fetchEvaluationMetrics()
       .then((data) => {
-        if (isMounted) setMetricsList(data || []);
+        if (isMounted) setMetricsList(Array.isArray(data) ? data : []);
       })
       .catch((err) => console.error("Failed to load metrics:", err))
       .finally(() => {
@@ -20,7 +20,9 @@ export default function About() {
     return () => { isMounted = false; };
   }, []);
 
-  const mpnetRetrieval = metricsList.find(m => m.system_name === 'MPNET_RETRIEVAL') || {
+  const safeMetricsList = Array.isArray(metricsList) ? metricsList : [];
+  const mpnetRetrieval = safeMetricsList.find(m => m.system_name === 'MPNET_RETRIEVAL') || {
+
     precision_at_5: 0.7660,
     precision_at_10: 0.7160,
     recall_at_5: 0.1223,
@@ -222,7 +224,7 @@ export default function About() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {metricsList.map((m, idx) => (
+                    {safeMetricsList.map((m, idx) => (
                       <tr key={idx} className={m.system_name === 'MPNET_RETRIEVAL' ? 'bg-amber-50/50 font-semibold' : 'hover:bg-bg-base'}>
                         <td className="p-2.5 font-mono text-xs">
                           {m.system_name}
