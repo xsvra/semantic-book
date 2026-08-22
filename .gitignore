@@ -11,6 +11,8 @@ models/
 semantic-book-backend/
 
 # Local Environment & Logs
+frontend/.env
+.env
 .env.local
 .DS_Store
 *.log
