@@ -92,8 +92,10 @@ if gr is not None:
 
     # 7. Mount Gradio interface onto root FastAPI app under /status
     app = gr.mount_gradio_app(fastapi_app, demo, path="/status")
-
-    # 8. Launch Gradio server loop to keep container running 24/7 without port conflict
-    demo.launch()
 else:
     app = fastapi_app
+
+# 8. Launch ONLY when executed directly as main script
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=7860)
