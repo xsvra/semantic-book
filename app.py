@@ -25,21 +25,29 @@ sys.modules["app"] = app_pkg
 spec.loader.exec_module(app_pkg)
 
 # 2. Import services & FastAPI routers
+from app.main import app as fastapi_app
 from app.services.book_repository import book_repo
 from app.ml.model_loader import model_loader
 from app.services.recommend_service import recommend_service
 from app.utils.query_validator import validate_search_query
-from app.api.v1.routes_books import router as books_router
-from app.api.v1.routes_recommend import router as recommend_router
-from app.api.v1.routes_search import router as search_router
-from app.api.v1.routes_meta import router as meta_router
 
-# 3. Pre-load Book Repository and ML Models into memory
+# 3. Pre-load Book Repository and ML Models ONCE into memory
 print("Pre-loading Book Repository and ML Models into memory...", flush=True)
-book_repo.load_data()
-model_loader.load_all()
+if not book_repo.books:
+    book_repo.load_data()
+if not model_loader.bi_encoder:
+    model_loader.load_all()
 
-# 4. ZeroGPU decorated function following official HF ZeroGPU specification
+# 4. Configure CORS Middleware on FastAPI root app to allow Vercel domain requests
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 5. Top-level ZeroGPU decorated function for HF ZeroGPU static AST analyzer
 @spaces.GPU
 def predict_search(query: str):
     is_valid, err_msg = validate_search_query(query)
@@ -53,7 +61,7 @@ def predict_search(query: str):
     titles = [f"{b.get('rank', 1)}. {b.get('title')} ({b.get('author')}) - Score: {b.get('similarity_score', 0)}" for b in results]
     return f"Ditemukan {total} buku (Waktu inferensi: {time_sec}s):\n\n" + "\n".join(titles)
 
-# 5. Create Gradio Blocks interface
+# 6. Create Gradio Blocks interface
 with gr.Blocks(title="Nonfiction Book Recommendation System API") as demo:
     gr.Markdown("""
     # 📚 Nonfiction Book Recommendation System API
@@ -70,23 +78,5 @@ with gr.Blocks(title="Nonfiction Book Recommendation System API") as demo:
     search_btn = gr.Button("Cari Rekomendasi")
     search_btn.click(fn=predict_search, inputs=input_text, outputs=output_text)
 
-# 6. Configure CORS Middleware on Gradio's underlying FastAPI app
-demo.app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# 7. Include FastAPI REST API routers directly into Gradio's underlying FastAPI app
-demo.app.include_router(books_router, prefix="/api/v1")
-demo.app.include_router(recommend_router, prefix="/api/v1")
-demo.app.include_router(search_router, prefix="/api/v1")
-demo.app.include_router(meta_router, prefix="/api/v1")
-
-# Export ASGI app instance
-app = demo.app
-
-# 8. Launch Gradio + FastAPI server loop for Hugging Face Space
-demo.launch()
+# 7. Mount Gradio interface onto root FastAPI app under /
+app = gr.mount_gradio_app(fastapi_app, demo, path="/")

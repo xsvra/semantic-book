@@ -14,11 +14,14 @@ from app.api.v1.routes_meta import router as meta_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up FastAPI application...")
-    # Pre-load repository & models
-    book_repo.load_data()
-    model_loader.load_all()
+    # Pre-load repository & models if not already loaded
+    if not book_repo.books:
+        book_repo.load_data()
+    if not model_loader.bi_encoder:
+        model_loader.load_all()
     yield
     print("Shutting down application...")
+
 
 app = FastAPI(
     title=settings.APP_NAME,
