@@ -7,30 +7,32 @@ os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(line_buffering=True)
 
-import importlib.util
+import importlib
 import gradio as gr
 import spaces
 
-# 1. Register 'app/' directory as a Python package to prevent module name collision
-app_dir = os.path.join(os.path.dirname(__file__), "app")
-init_file = os.path.join(app_dir, "__init__.py")
-if not os.path.exists(init_file):
-    with open(init_file, "w") as f:
-        pass
+# 1. Add current working directory to sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
-spec = importlib.util.spec_from_file_location("app", init_file, submodule_search_locations=[app_dir])
-app_pkg = importlib.util.module_from_spec(spec)
-sys.modules["app"] = app_pkg
-spec.loader.exec_module(app_pkg)
+# 2. Import app subpackage modules cleanly using importlib to prevent app.py name collision
+main_module = importlib.import_module("app.main")
+fastapi_app = main_module.app
 
-# 2. Import FastAPI root app & services
-from app.main import app as fastapi_app
-from app.services.book_repository import book_repo
-from app.ml.model_loader import model_loader
-from app.services.recommend_service import recommend_service
-from app.utils.query_validator import validate_search_query
+repo_module = importlib.import_module("app.services.book_repository")
+book_repo = repo_module.book_repo
 
-# 3. ZeroGPU decorated function following official HF ZeroGPU specification
+model_module = importlib.import_module("app.ml.model_loader")
+model_loader = model_module.model_loader
+
+recommend_module = importlib.import_module("app.services.recommend_service")
+recommend_service = recommend_module.recommend_service
+
+validator_module = importlib.import_module("app.utils.query_validator")
+validate_search_query = validator_module.validate_search_query
+
+# 3. Top-level ZeroGPU decorated function for HF ZeroGPU static AST analyzer
 @spaces.GPU
 def predict_search(query: str):
     is_valid, err_msg = validate_search_query(query)
