@@ -76,8 +76,9 @@ with gr.Blocks(title="Nonfiction Book Recommendation System API") as demo:
     search_btn = gr.Button("Cari Rekomendasi")
     search_btn.click(fn=predict_search, inputs=input_text, outputs=output_text)
 
-# 7. Mount Gradio interface onto root FastAPI app under /status
-app = gr.mount_gradio_app(fastapi_app, demo, path="/status")
+# 7. Mount Gradio interface onto root FastAPI app under /
+app = gr.mount_gradio_app(fastapi_app, demo, path="/")
+
 
 # 8. Launch ONLY when executed directly as main script
 if __name__ == "__main__":
