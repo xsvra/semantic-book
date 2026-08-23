@@ -31,12 +31,11 @@ from app.ml.model_loader import model_loader
 from app.services.recommend_service import recommend_service
 from app.utils.query_validator import validate_search_query
 
-# 3. Pre-load Book Repository and ML Models ONCE into memory
+# 3. Pre-load Book Repository and ML Models into memory
 print("Pre-loading Book Repository and ML Models into memory...", flush=True)
-if not book_repo.books:
-    book_repo.load_data()
-if not model_loader.bi_encoder:
-    model_loader.load_all()
+book_repo.load_data()
+model_loader.load_all()
+
 
 # 4. Configure CORS Middleware on FastAPI root app to allow Vercel domain requests
 fastapi_app.add_middleware(
