@@ -8,20 +8,8 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(line_buffering=True)
 
 import importlib.util
-
-try:
-    import gradio as gr
-except ImportError:
-    gr = None
-
-try:
-    import spaces
-except ImportError:
-    class spaces:
-        @staticmethod
-        def GPU(func):
-            return func
-
+import gradio as gr
+import spaces
 from fastapi.middleware.cors import CORSMiddleware
 
 # 1. Register 'app/' directory as a Python package to prevent module name collision
@@ -41,6 +29,7 @@ from app.main import app as fastapi_app
 from app.services.book_repository import book_repo
 from app.ml.model_loader import model_loader
 from app.services.recommend_service import recommend_service
+from app.utils.query_validator import validate_search_query
 
 # 3. Pre-load Book Repository and ML Models into memory
 print("Pre-loading Book Repository and ML Models into memory...", flush=True)
@@ -56,9 +45,7 @@ fastapi_app.add_middleware(
     allow_headers=["*"],
 )
 
-from app.utils.query_validator import validate_search_query
-
-# 5. ZeroGPU decorated function following official HF ZeroGPU specification
+# 5. Top-level ZeroGPU decorated function for HF ZeroGPU static AST analyzer
 @spaces.GPU
 def predict_search(query: str):
     is_valid, err_msg = validate_search_query(query)
@@ -72,28 +59,25 @@ def predict_search(query: str):
     titles = [f"{b.get('rank', 1)}. {b.get('title')} ({b.get('author')}) - Score: {b.get('similarity_score', 0)}" for b in results]
     return f"Ditemukan {total} buku (Waktu inferensi: {time_sec}s):\n\n" + "\n".join(titles)
 
-# 6. Create Gradio Blocks interface if Gradio is available
-if gr is not None:
-    with gr.Blocks(title="Nonfiction Book Recommendation System API") as demo:
-        gr.Markdown("""
-        # 📚 Nonfiction Book Recommendation System API
-        ### Status: **ONLINE 🟢**
-        
-        * **API Docs (Swagger):** [/docs](/docs)
-        * **Search Endpoint:** `/api/v1/search`
-        * **Recommendation Endpoint:** `/api/v1/recommend`
-        * **Books Catalog:** `/api/v1/books`
-        """)
-        with gr.Row():
-            input_text = gr.Textbox(label="Coba Search Buku", placeholder="Ketik topik atau judul buku...")
-            output_text = gr.Textbox(label="Hasil Rekomendasi API")
-        search_btn = gr.Button("Cari Rekomendasi")
-        search_btn.click(fn=predict_search, inputs=input_text, outputs=output_text)
+# 6. Create Gradio Blocks interface
+with gr.Blocks(title="Nonfiction Book Recommendation System API") as demo:
+    gr.Markdown("""
+    # 📚 Nonfiction Book Recommendation System API
+    ### Status: **ONLINE 🟢**
+    
+    * **API Docs (Swagger):** [/docs](/docs)
+    * **Search Endpoint:** `/api/v1/search`
+    * **Recommendation Endpoint:** `/api/v1/recommend`
+    * **Books Catalog:** `/api/v1/books`
+    """)
+    with gr.Row():
+        input_text = gr.Textbox(label="Coba Search Buku", placeholder="Ketik topik atau judul buku...")
+        output_text = gr.Textbox(label="Hasil Rekomendasi API")
+    search_btn = gr.Button("Cari Rekomendasi")
+    search_btn.click(fn=predict_search, inputs=input_text, outputs=output_text)
 
-    # 7. Mount Gradio interface onto root FastAPI app under /status
-    app = gr.mount_gradio_app(fastapi_app, demo, path="/status")
-else:
-    app = fastapi_app
+# 7. Mount Gradio interface onto root FastAPI app under /status
+app = gr.mount_gradio_app(fastapi_app, demo, path="/status")
 
 # 8. Launch ONLY when executed directly as main script
 if __name__ == "__main__":
