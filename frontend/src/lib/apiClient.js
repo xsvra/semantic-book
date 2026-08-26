@@ -1,8 +1,10 @@
 import axios from 'axios';
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1').replace(/\/$/, '');
-
-
+// Vite otomatis memilih URL yang tepat tergantung mode (dev vs prod)
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? 'http://localhost:8000/api/v1' : 'https://xsvra-semantic-book-backend.hf.space/api/v1')
+).replace(/\/$/, '');
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

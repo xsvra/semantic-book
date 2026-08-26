@@ -33,7 +33,7 @@ validator_module = importlib.import_module("app.utils.query_validator")
 validate_search_query = validator_module.validate_search_query
 
 # 3. Top-level ZeroGPU decorated function for HF ZeroGPU static AST analyzer
-@spaces.GPU
+@spaces.GPU(duration=60)
 def predict_search(query: str):
     is_valid, err_msg = validate_search_query(query)
     if not is_valid:
