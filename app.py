@@ -65,3 +65,8 @@ with gr.Blocks(title="Nonfiction Book Recommendation System API") as demo:
 
 # 5. Mount Gradio interface onto root FastAPI app under /
 app = gr.mount_gradio_app(fastapi_app, demo, path="/")
+
+# 6. Launch Uvicorn server loop on port 7860 to keep Hugging Face Space running 24/7
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=7860)
