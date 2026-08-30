@@ -3,10 +3,10 @@ import { Search, Globe, Brain, AlertTriangle, X } from 'lucide-react';
 import { validateSearchInput } from '../../lib/validateSearchInput';
 
 const SAMPLE_QUERIES = [
-  "cara mengelola waktu dan mengatasi prokrastinasi...",
-  "memahami penyebab kecemasan sosial dan membangun percaya diri...",
-  "strategi membangun kebiasaan baik secara konsisten...",
-  "managing teams and organizational leadership..."
+  "Saya sering menunda pekerjaan sampai deadline sudah dekat dan ingin belajar mengatasinya",
+  "Saya ingin pindah karier ke bidang teknologi tetapi belum tahu keterampilan apa yang harus dipelajari",
+  "I want to understand artificial intelligence without having a strong programming or mathematics background",
+  "Ich möchte meine Konzentration verbessern und mich bei der Arbeit weniger leicht ablenken lassen"
 ];
 
 export default function HeroSection({ query, setQuery, onSearch, useReranker, setUseReranker, isSearching }) {
